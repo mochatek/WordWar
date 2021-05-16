@@ -1,33 +1,32 @@
-import { Component } from "react";
+import { Component, Fragment } from "react";
 import Api from "../services/api";
+import Auth from "../services/auth";
 
 export default class User extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      load: false,
-      users: [],
+      stats: 0,
     };
   }
 
   async componentDidMount() {
-    const { msg } = await Api.get("users");
-    this.setState({ users: msg, load: true });
+    const { error, stats } = await Api.get("stats");
+    if (!error) this.setState({ stats });
   }
 
   render() {
     return (
       <div>
-        <h1>Users</h1>
-        {this.state.load ? (
-          this.state.users.length ? (
-            <p>{this.state.users}</p>
-          ) : (
-            <p>No registered users</p>
-          )
+        <h1>{Auth.getUser()}</h1>
+        {this.state.stats ? (
+          <Fragment>
+            <p>Matches: {this.state.stats.matches}</p>
+            <p>Wins: {this.state.stats.wins}</p>
+          </Fragment>
         ) : (
-          <p>Fetching registered users...</p>
+          <p>Loading stats</p>
         )}
       </div>
     );

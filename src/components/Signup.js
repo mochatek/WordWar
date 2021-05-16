@@ -22,11 +22,11 @@ export default class Signup extends Component {
   async doSignup(event) {
     event.preventDefault();
 
-    const { status, msg } = await Auth.signup(this.state.user, this.state.pass);
-    if (status === 200) {
-      alert(msg);
+    const { error, msg } = await Auth.signup(this.state.user, this.state.pass);
+    if (error) {
+      this.setState({ error });
     } else {
-      this.setState({ error: msg });
+      alert(msg);
     }
   }
 

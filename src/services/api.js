@@ -10,10 +10,9 @@ class ApiService {
       },
     });
 
-    const status = response.status;
     const data = await response.json();
 
-    return { status, msg: data.msg };
+    return data;
   }
 
   async post(resource, body) {
@@ -26,10 +25,9 @@ class ApiService {
       body: JSON.stringify(body),
     });
 
-    const status = response.status;
     const data = await response.json();
 
-    return { status, msg: data.msg };
+    return data;
   }
 }
 
