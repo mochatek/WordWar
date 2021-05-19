@@ -1,24 +1,29 @@
 import { Component, Fragment } from "react";
+import { withRouter } from "react-router-dom";
 import Api from "../services/api";
 import Auth from "../services/auth";
 import Challenge from "./Challenge";
 import socket from "../services/socket";
 
-export default class User extends Component {
+class User extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      stats: 0,
-      opponent: "",
+      stats: "",
       leaderboard: [],
-      message: "",
+      opponent_selected: "",
+      challenging: "",
+      challenged_by: "",
     };
 
-    this.challengePlayer = this.challengePlayer.bind(this);
+    this.selectOpponent = this.selectOpponent.bind(this);
+    this.deselectOpponent = this.deselectOpponent.bind(this);
     this.confirmChallenge = this.confirmChallenge.bind(this);
     this.cancelChallenge = this.cancelChallenge.bind(this);
     this.showChallenge = this.showChallenge.bind(this);
+    this.acceptChallenge = this.acceptChallenge.bind(this);
+    this.rejectChallenge = this.rejectChallenge.bind(this);
   }
 
   async componentDidMount() {
@@ -29,44 +34,116 @@ export default class User extends Component {
 
     socket.emit("join", Auth.getUser());
     socket.on("challenge", this.showChallenge);
+
+    this.props.history.listen(() => {
+      socket.emit("leave", Auth.getUser());
+    });
   }
 
-  async challengePlayer(event) {
+  async selectOpponent(event, opponent_name, status) {
     event.preventDefault();
-    const opponent_name = event.target.id;
 
-    if (!this.state.opponent || this.state.opponent.name !== opponent_name) {
+    if (
+      !this.state.opponent_selected ||
+      this.state.opponent_selected.name !== opponent_name
+    ) {
       const { error, stats } = await Api.get(`stats/${opponent_name}`);
       if (!error)
-        this.setState({ opponent: { name: opponent_name, ...stats } });
+        this.setState({ opponent_selected: { name: opponent_name, ...stats } });
     }
   }
 
+  deselectOpponent() {
+    this.setState({ opponent_selected: "" });
+  }
+
   confirmChallenge() {
-    socket.emit("challenge", this.state.opponent.name);
+    socket.emit("challenge", {
+      status: "request",
+      from: Auth.getUser(),
+      to: this.state.opponent_selected.name,
+    });
     this.setState({
-      message: `You challenged ${this.state.opponent.name}`,
+      challenging: this.state.opponent_selected.name,
+      opponent_selected: "",
     });
   }
 
   cancelChallenge() {
-    this.setState({ opponent: "" });
+    socket.emit("challenge", {
+      status: "cancel",
+      from: Auth.getUser(),
+      to: this.state.challenging,
+    });
+    this.setState({ challenging: "", opponent_selected: "" });
   }
 
-  showChallenge(user) {
-    this.setState({
-      message: `${user} challenged you`,
+  showChallenge({ status, from: user }) {
+    switch (status) {
+      case "request":
+        this.setState({
+          challenged_by: user,
+        });
+        break;
+      case "cancel":
+        this.setState({ challenged_by: "" });
+        break;
+      case "reject":
+      case "accept":
+        this.setState({ challenging: "" });
+        alert(`${user} ${status}ed the challenge`);
+        break;
+      default:
+        console.error("Unknown status");
+    }
+  }
+
+  acceptChallenge(event) {
+    event.preventDefault();
+
+    socket.emit("challenge", {
+      status: "accept",
+      from: Auth.getUser(),
+      to: this.state.challenged_by,
     });
+    this.setState({ challenged_by: "" });
+  }
+
+  rejectChallenge(event) {
+    event.preventDefault();
+
+    socket.emit("challenge", {
+      status: "reject",
+      from: Auth.getUser(),
+      to: this.state.challenged_by,
+    });
+    this.setState({ challenged_by: "" });
   }
 
   render() {
     return (
       <div>
         <h1>{Auth.getUser()}</h1>
-        {this.state.message ? (
-          <p style={{ color: "green", backgroundColor: "lightgreen" }}>
-            {this.state.message}
-          </p>
+        {this.state.challenging ? (
+          <Fragment>
+            <p style={{ color: "green", backgroundColor: "lightgreen" }}>
+              You are challenging: {this.state.challenging}
+            </p>
+            <button onClick={this.cancelChallenge}>Cancel</button>
+          </Fragment>
+        ) : null}
+        {this.state.challenged_by ? (
+          <Fragment>
+            <p style={{ color: "red", backgroundColor: "pink" }}>
+              You are challenged by: {this.state.challenged_by}
+            </p>
+            <button onClick={(event) => this.acceptChallenge(event)}>
+              Accept
+            </button>
+            <button onClick={(event) => this.rejectChallenge(event)}>
+              Reject
+            </button>
+          </Fragment>
         ) : null}
         {this.state.stats ? (
           <Fragment>
@@ -83,7 +160,10 @@ export default class User extends Component {
             {this.state.leaderboard.map((user) => {
               const { name, status } = user;
               return (
-                <li key={name} id={name} onClick={this.challengePlayer}>
+                <li
+                  key={name}
+                  onClick={(event) => this.selectOpponent(event, name, status)}
+                >
                   {name} : {status}
                 </li>
               );
@@ -92,10 +172,11 @@ export default class User extends Component {
         ) : (
           <p>No players available</p>
         )}
-        {this.state.opponent ? (
+        {this.state.opponent_selected ? (
           <Challenge
-            {...this.state.opponent}
-            cancelHandler={this.cancelChallenge}
+            {...this.state.opponent_selected}
+            status={!!this.state.challenging}
+            closeHandler={this.deselectOpponent}
             confirmHandler={this.confirmChallenge}
           />
         ) : null}
@@ -103,3 +184,5 @@ export default class User extends Component {
     );
   }
 }
+
+export default withRouter(User);

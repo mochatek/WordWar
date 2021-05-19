@@ -1,7 +1,6 @@
 class AuthService {
   constructor() {
     this.ENDPOINT = "http://localhost:5000/api/auth";
-    this.is_authenticated = false;
   }
 
   async signup(user, pass) {
@@ -25,10 +24,7 @@ class AuthService {
 
     const data = await response.json();
 
-    if (data.token) {
-      localStorage.setItem("access_token", data.token);
-      this.is_authenticated = true;
-    }
+    if (data.token) localStorage.setItem("access_token", data.token);
 
     return data;
   }

@@ -4,13 +4,13 @@ export default class Challenge extends Component {
   constructor(props) {
     super(props);
 
-    this.cancel = this.cancel.bind(this);
+    this.close = this.close.bind(this);
     this.confirm = this.confirm.bind(this);
   }
 
-  cancel(event) {
+  close(event) {
     event.preventDefault();
-    this.props.cancelHandler();
+    this.props.closeHandler();
   }
 
   confirm(event) {
@@ -19,7 +19,7 @@ export default class Challenge extends Component {
   }
 
   render() {
-    const { name, matches, wins, points } = this.props;
+    const { name, matches, wins, points, status } = this.props;
     return (
       <div>
         <p>Name: {name}</p>
@@ -27,8 +27,11 @@ export default class Challenge extends Component {
         <p>Wins: {wins}</p>
         <p>Points: {points}</p>
         <p>
-          Challenge ?<button onClick={this.confirm}>Confirm</button>
-          <button onClick={this.cancel}>cancel</button>
+          Challenge ?
+          <button onClick={this.confirm} disabled={status}>
+            Confirm
+          </button>
+          <button onClick={this.close}>Close</button>
         </p>
       </div>
     );
