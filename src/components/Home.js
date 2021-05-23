@@ -20,6 +20,7 @@ class Home extends Component {
         matches: 0,
         wins: 0,
         points: 0,
+        rank: 0,
       },
       opponents: [],
       opponent_selected: null,
@@ -54,6 +55,10 @@ class Home extends Component {
     this.props.history.listen(() => {
       socket.emit("leave", this.state.user.name);
     });
+
+    // this.props.history.listen(() => {
+    //   socket.emit("leave", Auth.getUser());
+    // });
   }
 
   selectOpponent(name) {
@@ -136,6 +141,7 @@ class Home extends Component {
     return (
       <Fragment>
         <Profile user={this.state.user} />
+        <Search />
         <Message
           listeners={[
             this.state.challenging,
@@ -149,7 +155,6 @@ class Home extends Component {
             this.closeMessage,
           ]}
         />
-        <Search />
         <Opponents
           players={this.state.opponents}
           selectHandler={this.selectOpponent}

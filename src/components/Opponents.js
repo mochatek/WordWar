@@ -6,7 +6,7 @@ export default class Opponents extends Component {
 
     return (
       <section id="opponents">
-        {this.props.players.map((player) => {
+        {this.props.players.map((player, index) => {
           return (
             <div
               className="opponent"
@@ -15,7 +15,7 @@ export default class Opponents extends Component {
             >
               <div className="opponent-profile">
                 <img
-                  src={`${process.env.PUBLIC_URL}/icons/icon-a.png`}
+                  src={`${process.env.PUBLIC_URL}/icons/icon-${index + 1}.png`}
                   className="opponent-icon"
                   alt="Player Icon"
                 />

@@ -3,13 +3,16 @@ import { Component } from "react";
 export default class Profile extends Component {
   render() {
     const { name, matches, wins, points } = this.props.user;
+    const rank = Math.min(+this.props.user.rank + 1, 4);
 
     return (
       <section id="profile">
         <div className="flex col">
-          <h5 className="player-name">@ {name}</h5>
+          <h5 className="player-name">
+            #{rank} {name}
+          </h5>
           <img
-            src={`${process.env.PUBLIC_URL}/icons/icon-g.png`}
+            src={`${process.env.PUBLIC_URL}/icons/icon-${rank}.png`}
             className="player-icon"
             alt="Player Icon"
           />
