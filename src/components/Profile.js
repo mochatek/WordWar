@@ -9,7 +9,8 @@ export default class Profile extends Component {
       <section id="profile">
         <div className="flex col">
           <h5 className="player-name">
-            #{rank} {name}
+            <span style={{ color: "white", fontSize: "1rem" }}>#{rank}</span>{" "}
+            {name}
           </h5>
           <img
             src={`${process.env.PUBLIC_URL}/icons/icon-${rank}.png`}
@@ -19,8 +20,10 @@ export default class Profile extends Component {
         </div>
         <div className="table">
           <div className="cell bg-red bold">M</div>
-          <div className="cell bg-blue bold">W</div>
-          <div className="cell bg-yellow bold">🏆</div>
+          <div className="cell bg-green bold">W</div>
+          <div className="cell bg-yellow bold">
+            <i className="fa fa-trophy"></i>
+          </div>
           <div className="cell circle-badge">{matches}</div>
           <div className="cell circle-badge">{wins}</div>
           <div className="cell circle-badge">{points}</div>

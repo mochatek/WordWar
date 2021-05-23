@@ -9,7 +9,9 @@ export default class Search extends Component {
           className="search-text"
           placeholder="Seach player name.."
         />
-        <button className="transparent">🔍</button>
+        <button>
+          <i className="fa fa-search"></i>
+        </button>
       </section>
     );
   }

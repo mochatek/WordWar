@@ -30,7 +30,6 @@ class AuthService {
   }
 
   signout() {
-    this.is_authenticated = false;
     return localStorage.removeItem("access_token");
   }
 

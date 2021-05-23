@@ -1,5 +1,5 @@
 import { Component, Fragment } from "react";
-import { withRouter } from "react-router-dom";
+// import { withRouter } from "react-router-dom";
 import Auth from "../services/auth";
 import Api from "../services/api";
 import socket from "../services/socket";
@@ -31,15 +31,20 @@ class Home extends Component {
 
     this.selectOpponent = this.selectOpponent.bind(this);
     this.deselectOpponent = this.deselectOpponent.bind(this);
+    this.refreshOpponents = this.refreshOpponents.bind(this);
+
     this.confirmChallenge = this.confirmChallenge.bind(this);
     this.cancelChallenge = this.cancelChallenge.bind(this);
     this.showChallenge = this.showChallenge.bind(this);
     this.acceptChallenge = this.acceptChallenge.bind(this);
     this.rejectChallenge = this.rejectChallenge.bind(this);
+
     this.closeMessage = this.closeMessage.bind(this);
   }
 
   async componentDidMount() {
+    socket.emit("join", this.state.user.name);
+
     const { error, stats } = await Api.get("stats");
     if (!error)
       this.setState((prev_state) => ({
@@ -49,17 +54,25 @@ class Home extends Component {
     const { err, opponents } = await Api.get("opponents");
     if (!err) this.setState({ opponents });
 
-    socket.emit("join", this.state.user.name);
     socket.on("challenge", this.showChallenge);
-
-    this.props.history.listen(() => {
-      socket.emit("leave", this.state.user.name);
-    });
+    socket.on("sync", this.syncOpponents);
 
     // this.props.history.listen(() => {
-    //   socket.emit("leave", Auth.getUser());
+    //   socket.emit("leave", this.state.user.name);
     // });
   }
+
+  syncOpponents = (users) => {
+    const opponents = [...this.state.opponents];
+
+    users.forEach((user) => {
+      const [name, status] = user;
+      const opponent = opponents.find((op) => op.name === name);
+      if (opponent) opponent.status = status;
+    });
+
+    this.setState({ opponents });
+  };
 
   selectOpponent(name) {
     // const opponent = this.state.opponents.find((user) => user.name === name);
@@ -68,6 +81,11 @@ class Home extends Component {
 
   deselectOpponent() {
     this.setState({ opponent_selected: null });
+  }
+
+  async refreshOpponents() {
+    const { err, opponents } = await Api.get("opponents");
+    if (!err) this.setState({ opponents });
   }
 
   confirmChallenge() {
@@ -155,6 +173,12 @@ class Home extends Component {
             this.closeMessage,
           ]}
         />
+        <h5 className="title">
+          OPPONENTS{" "}
+          <span onClick={this.refreshOpponents}>
+            <i className="fa fa-refresh"></i>
+          </span>
+        </h5>
         <Opponents
           players={this.state.opponents}
           selectHandler={this.selectOpponent}
@@ -169,4 +193,5 @@ class Home extends Component {
   }
 }
 
-export default withRouter(Home);
+// export default withRouter(Home);
+export default Home;

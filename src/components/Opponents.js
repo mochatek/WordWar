@@ -15,7 +15,10 @@ export default class Opponents extends Component {
             >
               <div className="opponent-profile">
                 <img
-                  src={`${process.env.PUBLIC_URL}/icons/icon-${index + 1}.png`}
+                  src={`${process.env.PUBLIC_URL}/icons/icon-${Math.min(
+                    index + 1,
+                    4
+                  )}.png`}
                   className="opponent-icon"
                   alt="Player Icon"
                 />
