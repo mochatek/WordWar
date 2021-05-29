@@ -29,6 +29,27 @@ class ApiService {
 
     return data;
   }
+
+  async getMeaning(word) {
+    const response = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en_US/${word}`
+    );
+    if (response.status !== 200) return { error: "Meaningless word" };
+
+    let data = await response.json();
+    data = data[0];
+
+    if (
+      data.meanings.every((meaning) =>
+        ["noun", "abbreviation", "crossReference"].includes(
+          meaning.partOfSpeech
+        )
+      )
+    )
+      return { error: "Noun is not allowed" };
+
+    return { meaning: data.meanings[0].definitions[0].definition };
+  }
 }
 
 export default new ApiService();

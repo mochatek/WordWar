@@ -1,7 +1,8 @@
 import { Component } from "react";
+import { withRouter, NavLink } from "react-router-dom";
 import Auth from "../services/auth";
 
-export default class Signup extends Component {
+class Signup extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -22,11 +23,11 @@ export default class Signup extends Component {
   async doSignup(event) {
     event.preventDefault();
 
-    const { error, msg } = await Auth.signup(this.state.user, this.state.pass);
+    const { error } = await Auth.signup(this.state.user, this.state.pass);
     if (error) {
       this.setState({ error });
     } else {
-      alert(msg);
+      this.props.history.push("/signin");
     }
   }
 
@@ -50,7 +51,10 @@ export default class Signup extends Component {
         />
         {this.state.error ? <p className="error">{this.state.error}</p> : null}
         <button type="submit">Signup</button>
+        <NavLink to="/signin">Signin</NavLink>
       </form>
     );
   }
 }
+
+export default withRouter(Signup);

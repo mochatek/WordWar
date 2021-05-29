@@ -9,6 +9,7 @@ import Message from "./Message";
 import Search from "./Search";
 import Opponents from "./Opponents";
 import Challenge from "./Challenge";
+import Game from "./Game";
 
 class Home extends Component {
   constructor(props) {
@@ -27,6 +28,7 @@ class Home extends Component {
       challenging: null,
       challenged_by: null,
       message: null,
+      game: null,
     };
 
     this.selectOpponent = this.selectOpponent.bind(this);
@@ -40,6 +42,8 @@ class Home extends Component {
     this.rejectChallenge = this.rejectChallenge.bind(this);
 
     this.closeMessage = this.closeMessage.bind(this);
+
+    this.startGame = this.startGame.bind(this);
   }
 
   async componentDidMount() {
@@ -75,7 +79,6 @@ class Home extends Component {
   };
 
   selectOpponent(name) {
-    // const opponent = this.state.opponents.find((user) => user.name === name);
     this.setState({ opponent_selected: name });
   }
 
@@ -109,24 +112,30 @@ class Home extends Component {
     this.setState({ challenging: null, opponent_selected: null });
   }
 
-  showChallenge({ status, from: user }) {
+  showChallenge({ status, from: user, room }) {
     switch (status) {
       case "request":
         this.setState({
           challenged_by: user,
         });
         break;
+
       case "cancel":
         this.setState({ challenged_by: null });
         break;
+
       case "reject":
       case "accept":
-        this.setState({ challenging: null });
-        this.setState({ message: `${user} ${status}ed the challenge` });
+        this.setState({
+          challenging: null,
+          message: `${user} ${status}ed the challenge`,
+        });
         break;
+
       case "start":
-        this.setState({ message: "Game started" });
+        this.startGame(user, room);
         break;
+
       default:
         console.error("Unknown status");
         break;
@@ -155,7 +164,22 @@ class Home extends Component {
     this.setState({ message: null });
   }
 
+  startGame(turn, room) {
+    socket.off("challenge", this.showChallenge);
+    // socket.off("sync", this.syncOpponents);
+    this.setState({ message: null, game: { turn, room } });
+  }
+
   render() {
+    if (this.state.game)
+      return (
+        <Game
+          socket={socket}
+          user={this.state.user.name}
+          room={this.state.game.room}
+          turn={this.state.game.turn}
+        />
+      );
     return (
       <Fragment>
         <Profile user={this.state.user} />
