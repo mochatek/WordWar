@@ -48,6 +48,19 @@ body {
 .bold {
   font-weight: bold;
 }
+.footer {
+  background-color: black;
+  font-family: monospace;
+  font-size: small;
+  margin: 0;
+  padding: 0.3rem 0;
+  justify-content: space-between;
+}
+.footer span,
+a {
+  color: lightgray;
+  margin: 0 0.4rem;
+}
 button {
   border-radius: 3px;
   padding: 0.5rem;

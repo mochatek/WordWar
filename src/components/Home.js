@@ -10,6 +10,7 @@ import Search from "./Search";
 import Opponents from "./Opponents";
 import Challenge from "./Challenge";
 import Game from "./Game";
+import Footer from "./Footer";
 
 class Home extends Component {
   constructor(props) {
@@ -198,8 +199,8 @@ class Home extends Component {
           ]}
         />
         <h5 className="title">
-          OPPONENTS{" "}
-          <span onClick={this.refreshOpponents}>
+          <i className="fa fa-bar-chart-o"></i>&nbsp;OPPONENTS
+          <span style={{ color: "green" }} onClick={this.refreshOpponents}>
             <i className="fa fa-refresh"></i>
           </span>
         </h5>
@@ -207,6 +208,7 @@ class Home extends Component {
           players={this.state.opponents}
           selectHandler={this.selectOpponent}
         />
+        <Footer />
         <Challenge
           opponent={this.state.opponent_selected}
           confirm={this.confirmChallenge}

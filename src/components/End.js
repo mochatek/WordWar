@@ -10,12 +10,14 @@ export default class End extends Component {
           <h3>{`You ${outcome} the game.`}</h3>
           <div className="flex" style={{ justifyContent: "space-evenly" }}>
             <button
+              className="bg-red"
               onClick={(event) => {
                 event.preventDefault();
                 window.location.reload(true);
               }}
             >
-              <i className="fas fa-portal-exit">Exit</i>
+              <i className="fa fa-sign-out"></i>
+              &nbsp;Exit
             </button>
           </div>
         </div>
