@@ -1,4 +1,5 @@
 import { Component } from "react";
+import Auth from "../services/auth";
 
 export default class Footer extends Component {
   render() {
@@ -20,6 +21,17 @@ export default class Footer extends Component {
             <i className="fa fa-linkedin-square"></i>
           </a>
         </span>
+        {this.props.signout && (
+          <span
+            className="signout"
+            onClick={() => {
+              Auth.signout();
+              window.location.reload();
+            }}
+          >
+            Signout
+          </span>
+        )}
         <span>&copy; MochaTek 2021</span>
       </div>
     );

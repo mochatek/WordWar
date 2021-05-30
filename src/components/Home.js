@@ -25,6 +25,7 @@ class Home extends Component {
         rank: 0,
       },
       opponents: [],
+      filtered_opponents: [],
       opponent_selected: null,
       challenging: null,
       challenged_by: null,
@@ -34,6 +35,7 @@ class Home extends Component {
 
     this.selectOpponent = this.selectOpponent.bind(this);
     this.deselectOpponent = this.deselectOpponent.bind(this);
+    this.searchOpponent = this.searchOpponent.bind(this);
     this.refreshOpponents = this.refreshOpponents.bind(this);
 
     this.confirmChallenge = this.confirmChallenge.bind(this);
@@ -57,7 +59,7 @@ class Home extends Component {
       }));
 
     const { err, opponents } = await Api.get("opponents");
-    if (!err) this.setState({ opponents });
+    if (!err) this.setState({ opponents, filtered_opponents: opponents });
 
     socket.on("challenge", this.showChallenge);
     socket.on("sync", this.syncOpponents);
@@ -87,9 +89,20 @@ class Home extends Component {
     this.setState({ opponent_selected: null });
   }
 
+  searchOpponent(player_name) {
+    if (player_name) {
+      const filtered_opponents = this.state.opponents.filter((op) =>
+        op.name.includes(player_name)
+      );
+      this.setState({ filtered_opponents });
+    } else {
+      this.setState({ filtered_opponents: this.state.opponents });
+    }
+  }
+
   async refreshOpponents() {
     const { err, opponents } = await Api.get("opponents");
-    if (!err) this.setState({ opponents });
+    if (!err) this.setState({ opponents, filtered_opponents: opponents });
   }
 
   confirmChallenge() {
@@ -167,7 +180,7 @@ class Home extends Component {
 
   startGame(turn, room) {
     socket.off("challenge", this.showChallenge);
-    // socket.off("sync", this.syncOpponents);
+    socket.off("sync", this.syncOpponents);
     this.setState({ message: null, game: { turn, room } });
   }
 
@@ -184,7 +197,7 @@ class Home extends Component {
     return (
       <Fragment>
         <Profile user={this.state.user} />
-        <Search />
+        <Search changeHandler={this.searchOpponent} />
         <Message
           listeners={[
             this.state.challenging,
@@ -199,16 +212,16 @@ class Home extends Component {
           ]}
         />
         <h5 className="title">
-          <i className="fa fa-bar-chart-o"></i>&nbsp;OPPONENTS
+          <i className="fa fa-users"></i>&nbsp;OPPONENTS
           <span style={{ color: "green" }} onClick={this.refreshOpponents}>
             <i className="fa fa-refresh"></i>
           </span>
         </h5>
         <Opponents
-          players={this.state.opponents}
+          players={this.state.filtered_opponents}
           selectHandler={this.selectOpponent}
         />
-        <Footer />
+        <Footer signout={true} />
         <Challenge
           opponent={this.state.opponent_selected}
           confirm={this.confirmChallenge}

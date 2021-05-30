@@ -6,14 +6,19 @@ export default class End extends Component {
 
     return (
       <div className="modalDialog">
-        <div>
-          <h3>{`You ${outcome} the game.`}</h3>
+        <div className="flex col">
+          <h3>{`You ${outcome} the challenge`}</h3>
+          <img
+            style={{ width: "15rem" }}
+            src={`${process.env.PUBLIC_URL}/icons/${outcome}.png`}
+            alt="outcome"
+          />
           <div className="flex" style={{ justifyContent: "space-evenly" }}>
             <button
               className="bg-red"
               onClick={(event) => {
                 event.preventDefault();
-                window.location.reload(true);
+                window.location.reload();
               }}
             >
               <i className="fa fa-sign-out"></i>

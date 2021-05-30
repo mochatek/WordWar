@@ -130,7 +130,11 @@ export default class Game extends Component {
           user_words={this.state.user_words}
           opponent_words={this.state.opponent_words}
         />
-        {this.state.error && <p className="error">{this.state.error}</p>}
+        {this.state.error && (
+          <p className="error">
+            <i className="fa fa-times-circle"></i>&nbsp;{this.state.error}
+          </p>
+        )}
         <Controls
           word={this.state.word}
           turn={this.state.turn}

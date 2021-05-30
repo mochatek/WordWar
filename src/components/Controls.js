@@ -26,7 +26,7 @@ export default class Controls extends Component {
       <form id="controls" className="flex" onSubmit={this.submit}>
         <input
           type="text"
-          className="search-text"
+          className="word-text"
           placeholder="Type your word.."
           value={this.props.word}
           onChange={this.changeWord}

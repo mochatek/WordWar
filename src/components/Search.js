@@ -5,13 +5,14 @@ export default class Search extends Component {
     return (
       <section id="search">
         <input
-          type="text"
+          type="search"
           className="search-text"
           placeholder="Seach player name.."
+          onChange={(event) => {
+            event.preventDefault();
+            this.props.changeHandler(event.target.value.trim().toLowerCase());
+          }}
         />
-        <button>
-          <i className="fa fa-search"></i>
-        </button>
       </section>
     );
   }

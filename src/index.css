@@ -51,15 +51,18 @@ body {
 .footer {
   background-color: black;
   font-family: monospace;
-  font-size: small;
+  font-size: medium;
   margin: 0;
-  padding: 0.3rem 0;
+  padding: 0.1rem 0;
   justify-content: space-between;
 }
 .footer span,
 a {
   color: lightgray;
-  margin: 0 0.4rem;
+  margin: 0.4rem;
+}
+.footer a {
+  font-size: 1.4rem;
 }
 button {
   border-radius: 3px;
@@ -67,6 +70,10 @@ button {
   font-weight: bold;
   border: none;
   background-color: white;
+  outline: 0;
+}
+input {
+  outline: 0;
 }
 #root {
   height: 100%;
@@ -94,6 +101,12 @@ button {
 .circle-badge {
   background: radial-gradient(rgb(0, 38, 68), rgb(170, 229, 252));
   border-radius: 50%;
+  font-weight: bold;
+}
+.signout {
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background-color: grey;
   font-weight: bold;
 }
 .title {
@@ -124,20 +137,16 @@ button {
   background-color: lightgrey;
   border: 0.5rem solid grey;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   padding: 0.5rem;
 }
 .search-text {
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 2rem;
   border-radius: 4px;
   text-indent: 1rem;
-}
-#search > button {
-  background: linear-gradient(rgb(128, 128, 128), black);
-  color: white;
-  font-size: 1.3rem;
+  border: none;
 }
 #message {
   background-color: red;
@@ -154,10 +163,11 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
   flex: 1 1 auto;
+  overflow-y: scroll;
 }
 .opponent {
+  margin: 0.3rem 0;
   cursor: pointer;
   background-color: black;
   border-radius: 4px;
@@ -266,4 +276,70 @@ summary {
   justify-content: space-evenly;
   padding: 1rem 0.5rem;
   background-color: black;
+}
+.word-text {
+  width: 85%;
+  height: 2rem;
+  border-radius: 4px;
+  text-indent: 1rem;
+  border: none;
+  outline: 0;
+}
+.signup-page {
+  background-color: #6ac0b0;
+  flex: 1;
+}
+.signup-page button {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #6ac0b0;
+  color: white;
+}
+.signup-page button:hover {
+  background-color: #1a5247;
+}
+.signin-page {
+  background-color: #89c06a;
+  flex: 1;
+}
+.signin-page button {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #43a047;
+  color: white;
+}
+.signin-page button:hover {
+  background-color: rgb(21, 65, 21);
+}
+.auth {
+  background-color: white;
+  padding: 2rem;
+  width: 50%;
+  border-radius: 4px;
+  border-left: 1rem solid rgb(70, 69, 69);
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.auth > * {
+  margin: 0.5rem;
+  width: 100%;
+}
+.auth input {
+  border: 0;
+  width: 95%;
+  padding: 1rem;
+  background: #f2f2f2;
+  border-radius: 4px;
+}
+.auth h4 {
+  color: rgb(68, 68, 68);
+  text-align: center;
+}
+.auth h4 a {
+  color: rgb(158, 4, 76);
+  text-decoration: none;
+}
+.auth p {
+  background-color: transparent;
+  border: none;
+  font-size: small;
 }
