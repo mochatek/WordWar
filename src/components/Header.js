@@ -15,7 +15,7 @@ export default class Header extends Component {
         <h1 className="timer">{this.props.time}</h1>
         <div className="player-card flex col">
           <img
-            src={`${process.env.PUBLIC_URL}/icons/icon-O.png`}
+            src={`${process.env.PUBLIC_URL}/icons/icon-o.png`}
             alt="Player icon"
             className="player-icon"
             style={{

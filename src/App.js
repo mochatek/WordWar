@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import ProtectedRoute from "./services/ProtectedRoute";
 import Signin from "./components/Signin";
 import Signup from "./components/Signup";
@@ -10,9 +10,9 @@ export default class App extends Component {
     return (
       <Router>
         <Switch>
+          <ProtectedRoute path="/" exact={true} component={Home} />
           <Route path="/signin" exact={true} component={Signin} />
           <Route path="/signup" exact={true} component={Signup} />
-          <ProtectedRoute path="/" exact={true} component={Home} />
         </Switch>
       </Router>
     );

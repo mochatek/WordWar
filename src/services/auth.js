@@ -1,6 +1,6 @@
 class AuthService {
   constructor() {
-    this.ENDPOINT = "http://localhost:5000/api/auth";
+    this.ENDPOINT = "https://word-war.herokuapp.com/api/auth";
   }
 
   async signup(user, pass) {

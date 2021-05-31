@@ -1,6 +1,6 @@
 class ApiService {
   constructor() {
-    this.ENDPOINT = "http://localhost:5000/api";
+    this.ENDPOINT = "https://word-war.herokuapp.com/api";
   }
 
   async get(resource) {

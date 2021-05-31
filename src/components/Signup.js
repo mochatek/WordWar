@@ -17,7 +17,7 @@ class Signup extends Component {
 
   changeHandler(event) {
     const name = event.target.name;
-    const value = event.target.value;
+    const value = event.target.value.trim().toLowerCase();
     this.setState({ [name]: value });
   }
 
