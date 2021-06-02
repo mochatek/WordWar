@@ -32,7 +32,7 @@ export default class End extends Component {
               className="bg-red"
               onClick={(event) => {
                 event.preventDefault();
-                window.location.reload();
+                window.location.reload(true);
               }}
             >
               <i className="fa fa-sign-out"></i>
