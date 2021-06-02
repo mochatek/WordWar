@@ -11,6 +11,7 @@ class Signin extends Component {
       pass: "",
       error: "",
     };
+
     this.changeHandler = this.changeHandler.bind(this);
     this.doSignin = this.doSignin.bind(this);
   }

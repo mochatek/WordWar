@@ -29,6 +29,8 @@ export default class Game extends Component {
     this.interval_id = 0;
     this.word_history = [];
 
+    this.word_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/word.ogg`);
+
     this.startTimer = this.startTimer.bind(this);
     this.endGame = this.endGame.bind(this);
 
@@ -100,6 +102,7 @@ export default class Game extends Component {
   }
 
   showWord({ from, word, meaning, turn }) {
+    this.word_sound.play();
     this.word_history.push(word);
 
     if (from === this.props.user) {

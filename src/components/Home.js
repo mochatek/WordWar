@@ -33,6 +33,11 @@ class Home extends Component {
       game: null,
     };
 
+    this.ui_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/ui.ogg`);
+    this.challenge_sound = new Audio(
+      `${process.env.PUBLIC_URL}/sounds/challenge.ogg`
+    );
+
     this.selectOpponent = this.selectOpponent.bind(this);
     this.deselectOpponent = this.deselectOpponent.bind(this);
     this.searchOpponent = this.searchOpponent.bind(this);
@@ -83,6 +88,7 @@ class Home extends Component {
 
   selectOpponent(name) {
     this.setState({ opponent_selected: name });
+    this.ui_sound.play();
   }
 
   deselectOpponent() {
@@ -127,6 +133,8 @@ class Home extends Component {
   }
 
   showChallenge({ status, from: user, room }) {
+    this.challenge_sound.play();
+
     switch (status) {
       case "request":
         this.setState({

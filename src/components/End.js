@@ -1,6 +1,20 @@
 import { Component } from "react";
 
 export default class End extends Component {
+  constructor(props) {
+    super(props);
+
+    this.end_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/end.ogg`);
+  }
+
+  componentDidMount() {
+    this.end_sound.play();
+  }
+
+  componentWillUnmount() {
+    this.end_sound.pause();
+  }
+
   render() {
     const outcome = this.props.outcome ? "won" : "lost";
 
