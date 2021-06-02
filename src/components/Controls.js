@@ -20,7 +20,7 @@ export default class Controls extends Component {
   }
 
   render() {
-    const border = this.props.turn ? "3px solid green" : "none";
+    const backgroundColor = this.props.turn ? "lightgreen" : "white";
 
     return (
       <form id="controls" className="flex" onSubmit={this.submit}>
@@ -30,7 +30,7 @@ export default class Controls extends Component {
           placeholder="Type your word.."
           value={this.props.word}
           onChange={this.changeWord}
-          style={{ border }}
+          style={{ backgroundColor }}
           autoFocus={this.props.turn}
         />
         <button className="bg-yellow" type="submit">

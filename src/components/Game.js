@@ -18,6 +18,7 @@ export default class Game extends Component {
       time: 20,
       error: null,
       winner: null,
+      fetching_word: false,
     };
 
     this.opponent = this.props.room
@@ -80,13 +81,14 @@ export default class Game extends Component {
   }
 
   async submitWord() {
-    if (this.state.word) {
+    if (this.state.word && !this.state.fetching_word) {
       if (this.word_history.includes(this.state.word)) {
         this.setState({ error: "Word already used" });
       } else {
+        this.setState({ fetching_word: true });
         const { error, meaning } = await Api.getMeaning(this.state.word);
         if (error) {
-          this.setState({ error });
+          this.setState({ error, fetching_word: false });
         } else {
           this.socket.emit("word", {
             room: this.props.room,
@@ -95,7 +97,7 @@ export default class Game extends Component {
             meaning,
             error,
           });
-          this.setState({ word: "", turn: false });
+          this.setState({ word: "", turn: false, fetching_word: false });
         }
       }
     }
