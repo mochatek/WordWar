@@ -75,6 +75,17 @@ button {
 input {
   outline: 0;
 }
+sup {
+  color: lightblue;
+}
+mark {
+  padding: 0.2rem;
+  color: rgb(207, 206, 206);
+  background-color: transparent;
+}
+ol li {
+  padding: 0.15rem 0;
+}
 #root {
   height: 100%;
   display: flex;
@@ -180,6 +191,7 @@ input {
   justify-content: space-between;
   align-items: center;
   box-shadow: 2px 4px 5px 1px grey;
+  -webkit-tap-highlight-color: transparent;
 }
 .opponent-profile {
   display: flex;

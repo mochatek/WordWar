@@ -33,7 +33,10 @@ class Home extends Component {
       game: null,
     };
 
-    this.ui_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/ui.ogg`);
+    this.select_sound = new Audio(
+      `${process.env.PUBLIC_URL}/sounds/select.ogg`
+    );
+    this.click_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/click.ogg`);
     this.challenge_sound = new Audio(
       `${process.env.PUBLIC_URL}/sounds/challenge.ogg`
     );
@@ -87,11 +90,14 @@ class Home extends Component {
   };
 
   selectOpponent(name) {
-    this.setState({ opponent_selected: name });
-    this.ui_sound.play();
+    if (!this.state.challenging) {
+      this.select_sound.play();
+      this.setState({ opponent_selected: name });
+    }
   }
 
   deselectOpponent() {
+    this.click_sound.play();
     this.setState({ opponent_selected: null });
   }
 
@@ -117,6 +123,7 @@ class Home extends Component {
       from: this.state.user.name,
       to: this.state.opponent_selected,
     });
+    this.click_sound.play();
     this.setState({
       challenging: this.state.opponent_selected,
       opponent_selected: null,
@@ -129,6 +136,7 @@ class Home extends Component {
       from: this.state.user.name,
       to: this.state.challenging,
     });
+    this.click_sound.play();
     this.setState({ challenging: null, opponent_selected: null });
   }
 
@@ -170,6 +178,7 @@ class Home extends Component {
       from: this.state.user.name,
       to: this.state.challenged_by,
     });
+    this.click_sound.play();
     this.setState({ challenged_by: null });
   }
 
@@ -179,10 +188,12 @@ class Home extends Component {
       from: this.state.user.name,
       to: this.state.challenged_by,
     });
+    this.click_sound.play();
     this.setState({ challenged_by: null });
   }
 
   closeMessage() {
+    this.click_sound.play();
     this.setState({ message: null });
   }
 
