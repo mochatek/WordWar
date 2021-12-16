@@ -1,27 +1,18 @@
-import { Component } from "react";
+export default function Challenge({ opponent, confirm, deselect }) {
+  return (
+    <div className="modalDialog">
+      <div>
+        <h3>Wanna challenge {opponent} ?</h3>
 
-export default class Challenge extends Component {
-  render() {
-    return this.props.opponent ? (
-      <div className="modalDialog">
-        <div>
-          <h3>Wanna challenge {this.props.opponent} ?</h3>
-          <div className="flex" style={{ justifyContent: "space-evenly" }}>
-            <button
-              className="button bg-green"
-              onClick={() => this.props.confirm()}
-            >
-              Confirm
-            </button>
-            <button
-              className="button bg-red"
-              onClick={() => this.props.deselect()}
-            >
-              Close
-            </button>
-          </div>
+        <div className="flex even">
+          <button className="button bg-green round" onClick={confirm}>
+            <i className="fa fa-thumbs-up"></i>
+          </button>
+          <button className="button bg-red round" onClick={deselect}>
+            <i className="fa fa-thumbs-down"></i>
+          </button>
         </div>
       </div>
-    ) : null;
-  }
+    </div>
+  );
 }

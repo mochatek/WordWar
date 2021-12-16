@@ -1,37 +1,46 @@
-import { Component, createRef } from "react";
+import { useRef, useEffect, memo } from "react";
 
-export default class Words extends Component {
-  constructor(props) {
-    super(props);
+const Words = memo(function ({ user_words, opponent_words }) {
+  const words_section = useRef(null);
 
-    this.words_section = createRef();
+  useEffect(() => {
+    words_section.current.scrollTop = words_section.current.scrollHeight;
+  }, [user_words, opponent_words]);
+
+  function playSpeech(event) {
+    event.preventDefault();
+    event.target.parentElement.parentElement.querySelector("audio")?.play();
   }
 
-  componentDidUpdate() {
-    this.words_section.current.scrollTop =
-      this.words_section.current.scrollHeight;
-  }
+  return (
+    <section id="words" className="flex" ref={words_section}>
+      <div className="flex col user-words">
+        {user_words.map(({ word, meaning, speech }, index) => (
+          <details className="bg-green" key={`u-${index}`}>
+            <summary>
+              {word}
+              {speech && <i className="fa fa-volume-up" onClick={playSpeech} />}
+            </summary>
+            <i>: {meaning}</i>
+            {speech && <audio controls src={speech} />}
+          </details>
+        ))}
+      </div>
 
-  render() {
-    return (
-      <section id="words" className="flex" ref={this.words_section}>
-        <div className="flex col user-words">
-          {this.props.user_words.map(({ word, meaning }, index) => (
-            <details className="bg-green" key={`u-${index}`}>
-              <summary>{word}</summary>
-              <i>: {meaning}</i>
-            </details>
-          ))}
-        </div>
-        <div className="flex col opponent-words">
-          {this.props.opponent_words.map(({ word, meaning }, index) => (
-            <details className="bg-blue" key={`o-${index}`}>
-              <summary>{word}</summary>
-              <i>: {meaning}</i>
-            </details>
-          ))}
-        </div>
-      </section>
-    );
-  }
-}
+      <div className="flex col opponent-words">
+        {opponent_words.map(({ word, meaning, speech }, index) => (
+          <details className="bg-blue" key={`o-${index}`}>
+            <summary>
+              {word}
+              {speech && <i className="fa fa-volume-up" onClick={playSpeech} />}
+            </summary>
+            <i>: {meaning}</i>
+            {speech && <audio controls src={speech} />}
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+});
+
+export default Words;

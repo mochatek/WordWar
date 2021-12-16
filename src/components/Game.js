@@ -1,155 +1,150 @@
-import { Component, Fragment } from "react";
+import { Fragment, useState, useEffect, useRef, useMemo } from "react";
+
 import Api from "../services/api";
+
 import Header from "./Header";
 import Words from "./Words";
 import Controls from "./Controls";
 import End from "./End";
 
-export default class Game extends Component {
-  constructor(props) {
-    super(props);
+const DURATION = 20;
+const WORD_AUDIO = new Audio(`${process.env.PUBLIC_URL}/sounds/word.ogg`);
 
-    this.state = {
-      turn: this.props.turn === this.props.user,
-      word: "",
-      user_words: [],
-      opponent_words: [],
-      start_letter: "",
-      time: 20,
-      error: null,
-      winner: null,
-      fetching_word: false,
+export default function Game({ socket, user, room, turn }) {
+  const [my_turn, setMyTurn] = useState(turn === user);
+  const [word, setWord] = useState("");
+  const [user_words, setUserWords] = useState([]);
+  const [opponent_words, setOpponentWords] = useState([]);
+  const [start_letter, setStartLetter] = useState("");
+  const [time, setTime] = useState(DURATION);
+  const [error, setError] = useState(null);
+  const [winner, setWinner] = useState(null);
+  const [fetching_word, setFetchingWord] = useState(false);
+
+  const interval_id = useRef(0);
+  const time_ref = useRef(time);
+  const word_history = useRef([]);
+
+  useEffect(() => {
+    socket.on("word", showWord);
+    socket.on("end", endGame);
+    startTimer();
+    return () => {
+      clearInterval(interval_id.current);
+      socket.off("word", showWord);
+      socket.off("end", endGame);
     };
+  }, []);
 
-    this.opponent = this.props.room
-      .replace(this.props.user, "")
-      .replace("-", "");
+  useEffect(() => (time_ref.current = time), [time]);
 
-    this.socket = this.props.socket;
+  const my_words = useMemo(() => [...user_words], [user_words]);
+  const rival_words = useMemo(() => [...opponent_words], [opponent_words]);
 
-    this.interval_id = 0;
-    this.word_history = [];
+  function startTimer() {
+    clearInterval(interval_id.current);
 
-    this.word_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/word.ogg`);
+    interval_id.current = setInterval(() => {
+      if (time_ref.current === 0) {
+        clearInterval(interval_id.current);
+        setMyTurn(false);
 
-    this.startTimer = this.startTimer.bind(this);
-    this.endGame = this.endGame.bind(this);
-
-    this.setWord = this.setWord.bind(this);
-    this.submitWord = this.submitWord.bind(this);
-    this.showWord = this.showWord.bind(this);
-  }
-
-  componentDidMount() {
-    this.socket.on("word", this.showWord);
-    this.socket.on("end", this.endGame);
-    this.startTimer();
-  }
-
-  startTimer() {
-    clearInterval(this.interval_id);
-
-    this.interval_id = setInterval(() => {
-      if (this.state.time === 0) {
-        clearInterval(this.interval_id);
-        this.setState({ turn: false });
-
-        this.socket.emit("end", { room: this.props.room });
+        socket.emit("end", { room });
       } else {
-        this.setState((prevState) => {
-          return { time: prevState.time - 1 };
-        });
+        setTime((prev) => prev - 1);
       }
     }, 1000);
   }
 
-  endGame(winner) {
-    clearInterval(this.interval_id);
-    this.socket.off("word", this.showWord);
-    this.socket.off("end", this.endGame);
-    this.setState({ winner });
+  function endGame(player) {
+    clearInterval(interval_id.current);
+    socket.off("word", showWord);
+    socket.off("end", endGame);
+    setWinner(player);
   }
 
-  setWord(word) {
-    if (this.state.turn) {
-      if (word.startsWith(this.state.start_letter)) {
-        this.setState({ word, error: null });
+  function updateWord(new_word) {
+    if (my_turn) {
+      if (new_word.startsWith(start_letter)) {
+        setWord(new_word);
+        setError(null);
       } else {
-        this.setState({ error: `Must start with ${this.state.start_letter}` });
+        setError(`Must start with '${start_letter.toUpperCase()}'`);
       }
     }
   }
 
-  async submitWord() {
-    if (this.state.word && !this.state.fetching_word) {
-      if (this.word_history.includes(this.state.word)) {
-        this.setState({ error: "Word already used" });
+  async function submitWord() {
+    if (word && !fetching_word) {
+      if (word_history.current.includes(word)) {
+        setError("Word already used");
       } else {
-        this.setState({ fetching_word: true });
-        const { error, meaning } = await Api.getMeaning(this.state.word);
-        if (error) {
-          this.setState({ error, fetching_word: false });
+        setFetchingWord(true);
+        const {
+          error: word_error,
+          meaning,
+          speech,
+        } = await Api.getMeaning(word);
+        if (word_error) {
+          setError(word_error);
+          setFetchingWord(false);
         } else {
-          this.socket.emit("word", {
-            room: this.props.room,
-            from: this.props.user,
-            word: this.state.word,
+          socket.emit("word", {
+            room,
+            from: user,
+            word,
             meaning,
-            error,
+            speech,
           });
-          this.setState({ word: "", turn: false, fetching_word: false });
+          setWord("");
+          setMyTurn(false);
+          setFetchingWord(false);
         }
       }
     }
   }
 
-  showWord({ from, word, meaning, turn }) {
-    this.word_sound.play();
-    this.word_history.push(word);
+  function showWord({ from, word: new_word, meaning, speech, turn }) {
+    WORD_AUDIO.play();
+    word_history.current.push(new_word);
 
-    if (from === this.props.user) {
-      const user_words = [...this.state.user_words, { word, meaning }];
-      this.setState({ user_words, turn: turn === this.props.user, time: 20 });
+    if (from === user) {
+      setUserWords((prev) => [...prev, { word: new_word, meaning, speech }]);
+      setMyTurn(turn === user);
+      setTime(DURATION);
     } else {
-      const opponent_words = [...this.state.opponent_words, { word, meaning }];
-      this.setState({
-        opponent_words,
-        turn: turn === this.props.user,
-        time: 20,
-        start_letter: word.slice(-1),
-      });
+      setOpponentWords((prev) => [
+        ...prev,
+        { word: new_word, meaning, speech },
+      ]);
+      setMyTurn(turn === user);
+      setTime(DURATION);
+      setStartLetter(new_word.slice(-1));
     }
 
-    this.startTimer();
+    startTimer();
   }
 
-  render() {
-    return (
-      <Fragment>
-        <Header
-          user={this.props.user}
-          opponent={this.opponent}
-          time={this.state.time}
-        />
-        <Words
-          user_words={this.state.user_words}
-          opponent_words={this.state.opponent_words}
-        />
-        {this.state.error && (
-          <p className="error">
-            <i className="fa fa-times-circle"></i>&nbsp;{this.state.error}
-          </p>
-        )}
-        <Controls
-          word={this.state.word}
-          turn={this.state.turn}
-          wordHandler={this.setWord}
-          submitHandler={this.submitWord}
-        />
-        {this.state.winner && (
-          <End outcome={this.props.user === this.state.winner} />
-        )}
-      </Fragment>
-    );
-  }
+  return (
+    <Fragment>
+      <Header
+        user={user}
+        opponent={room.replace(user, "").replace("-", "")}
+        time={time}
+      />
+      <Words user_words={my_words} opponent_words={rival_words} />
+      {error && (
+        <p className="error">
+          <i className="fa fa-times-circle"></i>&nbsp;{error}
+        </p>
+      )}
+      <Controls
+        word={word}
+        turn={my_turn}
+        wordHandler={updateWord}
+        submitHandler={submitWord}
+      />
+      {winner && <End outcome={user === winner} />}
+    </Fragment>
+  );
 }

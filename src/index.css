@@ -3,15 +3,21 @@
 
 html,
 body {
-  height: 100%;
+  height: 100vh;
   margin: 0;
   font-family: "Cairo";
   background-color: lightgray;
+}
+audio {
+  display: none;
 }
 .flex {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.even {
+  justify-content: space-evenly;
 }
 .col {
   flex-direction: column;
@@ -41,6 +47,9 @@ body {
 .blue {
   color: blue;
 }
+.green {
+  color: green;
+}
 .transparent {
   background-color: transparent;
   border: none;
@@ -63,6 +72,10 @@ a {
 }
 .footer a {
   font-size: 1.4rem;
+}
+.footer i.fa-info-circle {
+  color: lightblue;
+  font-size: 1.5rem;
 }
 button {
   border-radius: 3px;
@@ -113,6 +126,7 @@ ol li {
   background: radial-gradient(rgb(0, 38, 68), rgb(170, 229, 252));
   border-radius: 50%;
   font-weight: bold;
+  transform: translateY(-4px);
 }
 .signout {
   padding: 0.2rem 0.4rem;
@@ -145,6 +159,11 @@ ol li {
   color: #f6911d;
   margin: 0.5rem;
 }
+.player-name span {
+  color: white;
+  font-size: 1rem;
+}
+
 #search {
   background-color: lightgrey;
   border: 0.5rem solid grey;
@@ -192,6 +211,17 @@ ol li {
   align-items: center;
   box-shadow: 2px 4px 5px 1px grey;
   -webkit-tap-highlight-color: transparent;
+  animation: curtain 0.6s ease-in 0s 1;
+}
+@keyframes curtain {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  100% {
+    height: 3rem;
+    opacity: 1;
+  }
 }
 .opponent-profile {
   display: flex;
@@ -234,6 +264,16 @@ ol li {
   border-radius: 10px;
   background: linear-gradient(#fff, rgb(29, 28, 28));
 }
+.modalDialog img {
+  width: 15rem;
+}
+.modalDialog h3 {
+  font-family: monospace;
+}
+.modalDialog button.round {
+  border-radius: 50%;
+  font-size: large;
+}
 #header {
   justify-content: space-between;
   background-color: black;
@@ -274,16 +314,27 @@ details {
 summary {
   font-weight: bold;
   font-size: large;
+  position: relative;
+}
+summary i {
+  position: absolute;
+  right: 9px;
+  font-size: medium;
+  top: 20%;
+  opacity: 0.8;
 }
 .error {
-  font-family: "Cambria";
-  color: red;
+  font-family: monospace;
+  color: #ff3838;
   margin: 0;
   padding: 0.1rem;
-  border: 0.2px solid red;
-  background-color: lightsalmon;
+  border: 0.1px solid #ff3838;
+  background-color: #fee0d4;
   text-align: center;
   font-weight: bold;
+}
+.error i {
+  font-size: 12px;
 }
 #controls {
   justify-content: space-evenly;
@@ -355,4 +406,37 @@ summary {
   background-color: transparent;
   border: none;
   font-size: small;
+}
+#instruction {
+  margin: 0 0.5rem;
+  margin-bottom: 2.5rem;
+}
+#instruction div {
+  background: black;
+  color: grey;
+  border: 1px solid skyblue;
+}
+#instruction h3 {
+  width: 95%;
+}
+#instruction h3 span:nth-child(1) {
+  color: skyblue;
+  margin-bottom: 0;
+  text-decoration: underline;
+}
+#instruction h3 span:nth-child(2) {
+  color: grey;
+  position: absolute;
+  right: 2rem;
+}
+.rotate {
+  animation: spin 0.6s linear 0s infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

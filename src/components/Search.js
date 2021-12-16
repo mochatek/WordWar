@@ -1,19 +1,21 @@
-import { Component } from "react";
+import { memo } from "react";
 
-export default class Search extends Component {
-  render() {
-    return (
-      <section id="search">
-        <input
-          type="search"
-          className="search-text"
-          placeholder="Seach player name.."
-          onChange={(event) => {
-            event.preventDefault();
-            this.props.changeHandler(event.target.value.trim().toLowerCase());
-          }}
-        />
-      </section>
-    );
+const Search = memo(function ({ changeHandler }) {
+  function setSearchedPlayer(event) {
+    event.preventDefault();
+    changeHandler(event.target.value.trim().toLowerCase());
   }
-}
+
+  return (
+    <section id="search">
+      <input
+        type="search"
+        className="search-text"
+        placeholder="Seach player name.."
+        onChange={setSearchedPlayer}
+      />
+    </section>
+  );
+});
+
+export default Search;

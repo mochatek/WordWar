@@ -47,9 +47,12 @@ class ApiService {
         )
       )
     )
-      return { error: "Noun is not allowed" };
+      return { error: "Noun/Abbreviation/Cross-Reference is not allowed" };
 
-    return { meaning: data.meanings[0].definitions[0].definition };
+    return {
+      meaning: data.meanings[0].definitions[0].definition,
+      speech: data.phonetics[0]?.audio,
+    };
   }
 }
 

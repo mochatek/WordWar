@@ -1,5 +1,5 @@
-import { Component, Fragment } from "react";
-// import { withRouter } from "react-router-dom";
+import { Fragment, useState, useEffect, useCallback } from "react";
+
 import Auth from "../services/auth";
 import Api from "../services/api";
 import socket from "../services/socket";
@@ -12,158 +12,159 @@ import Challenge from "./Challenge";
 import Game from "./Game";
 import Footer from "./Footer";
 
-class Home extends Component {
-  constructor(props) {
-    super(props);
+const SELECT_SOUND = new Audio(`${process.env.PUBLIC_URL}/sounds/select.ogg`);
+const CLICK_SOUND = new Audio(`${process.env.PUBLIC_URL}/sounds/click.ogg`);
+const MATCH_SOUND = new Audio(`${process.env.PUBLIC_URL}/sounds/challenge.ogg`);
 
-    this.state = {
-      user: {
-        name: Auth.getUser(),
-        matches: 0,
-        wins: 0,
-        points: 0,
-        rank: 0,
-      },
-      opponents: [],
-      filtered_opponents: [],
-      opponent_selected: null,
-      challenging: null,
-      challenged_by: null,
-      message: null,
-      game: null,
-    };
+export default function Home() {
+  const [user, setUser] = useState({
+    name: Auth.getUser(),
+    matches: 0,
+    wins: 0,
+    points: 0,
+    rank: 0,
+  });
+  const [opponents, setOpponents] = useState([]);
+  const [filtered_opponents, setFilteredOpponents] = useState([]);
+  const [opponent_selected, setOpponentSelected] = useState(null);
+  const [challenging, setChallenging] = useState(null);
+  const [challenged_by, setChallengedBy] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [game, setGame] = useState(null);
+  const [loader, setLoader] = useState(true);
 
-    this.select_sound = new Audio(
-      `${process.env.PUBLIC_URL}/sounds/select.ogg`
-    );
-    this.click_sound = new Audio(`${process.env.PUBLIC_URL}/sounds/click.ogg`);
-    this.challenge_sound = new Audio(
-      `${process.env.PUBLIC_URL}/sounds/challenge.ogg`
-    );
+  /* To deal with stale closure of state in socket callback, either:
+    =>  const opponentsRef = useRef(opponents); and then update ref when opponents change
+    =>  Use functional state update in callback
+  */
 
-    this.selectOpponent = this.selectOpponent.bind(this);
-    this.deselectOpponent = this.deselectOpponent.bind(this);
-    this.searchOpponent = this.searchOpponent.bind(this);
-    this.refreshOpponents = this.refreshOpponents.bind(this);
+  useEffect(() => {
+    socket.emit("join", user.name);
+    socket.on("challenge", showChallenge);
+    socket.on("sync", syncOpponents);
 
-    this.confirmChallenge = this.confirmChallenge.bind(this);
-    this.cancelChallenge = this.cancelChallenge.bind(this);
-    this.showChallenge = this.showChallenge.bind(this);
-    this.acceptChallenge = this.acceptChallenge.bind(this);
-    this.rejectChallenge = this.rejectChallenge.bind(this);
+    (async () => {
+      const { error: stats_error, stats } = await Api.get("stats");
+      if (!stats_error) setUser((prev) => ({ ...prev, ...stats }));
 
-    this.closeMessage = this.closeMessage.bind(this);
+      setLoader(true);
 
-    this.startGame = this.startGame.bind(this);
-  }
-
-  async componentDidMount() {
-    socket.emit("join", this.state.user.name);
-
-    const { error, stats } = await Api.get("stats");
-    if (!error)
-      this.setState((prev_state) => ({
-        user: { ...prev_state.user, ...stats },
-      }));
-
-    const { err, opponents } = await Api.get("opponents");
-    if (!err) this.setState({ opponents, filtered_opponents: opponents });
-
-    socket.on("challenge", this.showChallenge);
-    socket.on("sync", this.syncOpponents);
-
-    // this.props.history.listen(() => {
-    //   socket.emit("leave", this.state.user.name);
-    // });
-  }
-
-  syncOpponents = (users) => {
-    const opponents = [...this.state.opponents];
-
-    users.forEach((user) => {
-      const [name, status] = user;
-      const opponent = opponents.find((op) => op.name === name);
-      if (opponent) opponent.status = status;
-    });
-
-    this.setState({ opponents });
-  };
-
-  selectOpponent(name) {
-    if (!this.state.challenging) {
-      this.select_sound.play();
-      this.setState({ opponent_selected: name });
-    }
-  }
-
-  deselectOpponent() {
-    this.click_sound.play();
-    this.setState({ opponent_selected: null });
-  }
-
-  searchOpponent(player_name) {
-    if (player_name) {
-      const filtered_opponents = this.state.opponents.filter((op) =>
-        op.name.includes(player_name)
+      const { error: op_error, opponents: my_opponents } = await Api.get(
+        "opponents"
       );
-      this.setState({ filtered_opponents });
-    } else {
-      this.setState({ filtered_opponents: this.state.opponents });
+      if (!op_error) {
+        setOpponents(my_opponents);
+      }
+    })();
+
+    return () => {
+      socket.disconnect();
+      socket.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    setFilteredOpponents(opponents);
+    setLoader(false);
+  }, [opponents]);
+
+  function syncOpponents(players) {
+    setLoader(true);
+    setOpponents((prev) => {
+      const my_opponents = [...prev];
+
+      players.forEach((player) => {
+        const [name, status] = player;
+        const op_player = my_opponents.find((op) => op.name === name);
+        if (op_player) {
+          op_player.status = status;
+        } else {
+          my_opponents.push({ name, points: 0, status });
+        }
+      });
+
+      return my_opponents;
+    });
+  }
+
+  const searchOpponent = useCallback(
+    (player_name) => {
+      if (player_name) {
+        const matching_players = opponents.filter((op) =>
+          op.name.includes(player_name)
+        );
+        setFilteredOpponents(matching_players);
+      } else {
+        setFilteredOpponents(opponents);
+      }
+    },
+    [opponents]
+  );
+
+  function selectOpponent(name) {
+    if (!challenging) {
+      SELECT_SOUND.play();
+      setOpponentSelected(name);
     }
   }
 
-  async refreshOpponents() {
-    const { err, opponents } = await Api.get("opponents");
-    if (!err) this.setState({ opponents, filtered_opponents: opponents });
+  function deselectOpponent() {
+    CLICK_SOUND.play();
+    setOpponentSelected(null);
   }
 
-  confirmChallenge() {
+  async function refreshOpponents() {
+    setLoader(true);
+    const { error: op_error, opponents: new_opponents } = await Api.get(
+      "opponents"
+    );
+    if (!op_error) setOpponents(new_opponents);
+  }
+
+  function confirmChallenge() {
     socket.emit("challenge", {
       status: "request",
-      from: this.state.user.name,
-      to: this.state.opponent_selected,
+      from: user.name,
+      to: opponent_selected,
     });
-    this.click_sound.play();
-    this.setState({
-      challenging: this.state.opponent_selected,
-      opponent_selected: null,
-    });
+
+    CLICK_SOUND.play();
+    setChallenging(opponent_selected);
+    setOpponentSelected(null);
   }
 
-  cancelChallenge() {
+  function cancelChallenge() {
     socket.emit("challenge", {
       status: "cancel",
-      from: this.state.user.name,
-      to: this.state.challenging,
+      from: user.name,
+      to: challenging,
     });
-    this.click_sound.play();
-    this.setState({ challenging: null, opponent_selected: null });
+
+    CLICK_SOUND.play();
+    setChallenging(null);
+    setOpponentSelected(null);
   }
 
-  showChallenge({ status, from: user, room }) {
-    this.challenge_sound.play();
+  function showChallenge({ status, from: player, room }) {
+    MATCH_SOUND.play();
 
     switch (status) {
       case "request":
-        this.setState({
-          challenged_by: user,
-        });
+        setChallengedBy(player);
         break;
 
       case "cancel":
-        this.setState({ challenged_by: null });
+        setChallengedBy(null);
         break;
 
       case "reject":
       case "accept":
-        this.setState({
-          challenging: null,
-          message: `${user} ${status}ed the challenge`,
-        });
+        setChallenging(null);
+        setMessage(`${player} ${status}ed the challenge`);
         break;
 
       case "start":
-        this.startGame(user, room);
+        startGame(player, room);
         break;
 
       default:
@@ -172,84 +173,86 @@ class Home extends Component {
     }
   }
 
-  acceptChallenge() {
+  function acceptChallenge() {
     socket.emit("challenge", {
       status: "accept",
-      from: this.state.user.name,
-      to: this.state.challenged_by,
+      from: user.name,
+      to: challenged_by,
     });
-    this.click_sound.play();
-    this.setState({ challenged_by: null });
+
+    CLICK_SOUND.play();
+    setChallengedBy(null);
   }
 
-  rejectChallenge() {
+  function rejectChallenge() {
     socket.emit("challenge", {
       status: "reject",
-      from: this.state.user.name,
-      to: this.state.challenged_by,
+      from: user.name,
+      to: challenged_by,
     });
-    this.click_sound.play();
-    this.setState({ challenged_by: null });
+
+    CLICK_SOUND.play();
+    setChallengedBy(null);
   }
 
-  closeMessage() {
-    this.click_sound.play();
-    this.setState({ message: null });
+  function closeMessage() {
+    CLICK_SOUND.play();
+    setMessage(null);
   }
 
-  startGame(turn, room) {
-    socket.off("challenge", this.showChallenge);
-    socket.off("sync", this.syncOpponents);
-    this.setState({ message: null, game: { turn, room } });
+  function startGame(starting_player, room) {
+    socket.off("challenge", showChallenge);
+    socket.off("sync", syncOpponents);
+    setMessage(null);
+    setGame({ turn: starting_player, room });
   }
 
-  render() {
-    if (this.state.game)
-      return (
-        <Game
-          socket={socket}
-          user={this.state.user.name}
-          room={this.state.game.room}
-          turn={this.state.game.turn}
-        />
-      );
+  if (game)
     return (
-      <Fragment>
-        <Profile user={this.state.user} />
-        <Search changeHandler={this.searchOpponent} />
-        <Message
-          listeners={[
-            this.state.challenging,
-            this.state.challenged_by,
-            this.state.message,
-          ]}
-          handlers={[
-            this.cancelChallenge,
-            this.acceptChallenge,
-            this.rejectChallenge,
-            this.closeMessage,
-          ]}
-        />
-        <h5 className="title">
-          <i className="fa fa-users"></i>&nbsp;OPPONENTS
-          <span style={{ color: "green" }} onClick={this.refreshOpponents}>
-            <i className="fa fa-refresh"></i>
-          </span>
-        </h5>
-        <Opponents
-          players={this.state.filtered_opponents}
-          selectHandler={this.selectOpponent}
-        />
-        <Footer signout={true} />
-        <Challenge
-          opponent={this.state.opponent_selected}
-          confirm={this.confirmChallenge}
-          deselect={this.deselectOpponent}
-        />
-      </Fragment>
+      <Game
+        socket={socket}
+        user={user.name}
+        room={game.room}
+        turn={game.turn}
+      />
     );
-  }
-}
 
-// export default withRouter(Home);
-export default Home;
+  return (
+    <Fragment>
+      <Profile {...user} />
+
+      <Search changeHandler={searchOpponent} />
+
+      {(challenging || challenged_by || message) && (
+        <Message
+          listeners={[challenging, challenged_by, message]}
+          handlers={[
+            cancelChallenge,
+            acceptChallenge,
+            rejectChallenge,
+            closeMessage,
+          ]}
+        />
+      )}
+
+      <h5 className="title">
+        <i className="fa fa-users"></i>&nbsp;OPPONENTS
+        <span className="green" onClick={refreshOpponents}>
+          <i className={loader ? "fa fa-refresh rotate" : "fa fa-refresh"}></i>
+        </span>
+      </h5>
+
+      <Opponents players={filtered_opponents} selectHandler={selectOpponent} />
+
+      <Footer signout={true} />
+
+      {opponent_selected && (
+        <Challenge
+          opponent={opponent_selected}
+          confirm={confirmChallenge}
+          deselect={deselectOpponent}
+        />
+      )}
+    </Fragment>
+  );
+}

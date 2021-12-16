@@ -1,38 +1,36 @@
-import { Component } from "react";
+const STATUS_CATEGORY = { 0: "red", 1: "green", 2: "orange" };
 
-export default class Opponents extends Component {
-  render() {
-    const status_category = { 0: "red", 1: "green", 2: "orange" };
+function getRank(rank) {
+  return Math.min(+rank + 1, 4);
+}
 
-    return (
-      <section id="opponents">
-        {this.props.players.map((player, index) => {
-          return (
-            <div
-              className="opponent"
-              key={player.name}
-              onClick={() => this.props.selectHandler(player.name)}
-            >
-              <div className="opponent-profile">
-                <img
-                  src={`${process.env.PUBLIC_URL}/icons/icon-${Math.min(
-                    index + 1,
-                    4
-                  )}.png`}
-                  className="opponent-icon"
-                  alt="Player Icon"
-                />
-                <span className="opponent-name">{player.name}</span>
-              </div>
-              <div
-                className={`opponent-status bg-${
-                  status_category[player.status]
-                }`}
-              ></div>
+export default function Opponents({ players, selectHandler }) {
+  return (
+    <section id="opponents">
+      {players.map((player, index) => {
+        return (
+          <div
+            className="opponent"
+            key={player.name}
+            onClick={() => selectHandler(player.name)}
+          >
+            <div className="opponent-profile">
+              <img
+                src={`${process.env.PUBLIC_URL}/icons/icon-${getRank(
+                  index
+                )}.png`}
+                className="opponent-icon"
+                alt="Player Icon"
+              />
+              <span className="opponent-name">{player.name}</span>
             </div>
-          );
-        })}
-      </section>
-    );
-  }
+
+            <div
+              className={`opponent-status bg-${STATUS_CATEGORY[player.status]}`}
+            ></div>
+          </div>
+        );
+      })}
+    </section>
+  );
 }

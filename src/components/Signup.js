@@ -1,79 +1,70 @@
-import { Component, Fragment } from "react";
-import { withRouter, NavLink } from "react-router-dom";
+import { Fragment, useState } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
 import Auth from "../services/auth";
 import Footer from "./Footer";
 
-class Signup extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: "",
-      pass: "",
-      error: "",
-    };
-    this.changeHandler = this.changeHandler.bind(this);
-    this.doSignup = this.doSignup.bind(this);
-  }
+export default function Signup() {
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [error, setError] = useState("");
 
-  changeHandler(event) {
+  const navigate = useNavigate();
+
+  function changeHandler(event) {
     const name = event.target.name;
     const value = event.target.value.trim().toLowerCase();
-    this.setState({ [name]: value });
+    name === "user" ? setUser(value) : setPass(value);
   }
 
-  async doSignup(event) {
+  async function signUpUser(event) {
     event.preventDefault();
 
-    if (this.state.user.trim() && this.state.pass.trim()) {
-      const { error } = await Auth.signup(this.state.user, this.state.pass);
-      if (error) {
-        this.setState({ error });
+    if (user.trim() && pass.trim()) {
+      const { error: signup_error } = await Auth.signup(user, pass);
+      if (signup_error) {
+        setError(signup_error);
       } else {
-        this.props.history.push("/signin");
+        navigate("/signin");
       }
     } else {
-      this.setState({ error: "Name/password missing" });
+      setError("Name/password missing");
     }
   }
 
-  render() {
-    return (
-      <Fragment>
-        <div className="flex col signup-page">
-          <form onSubmit={this.doSignup} className="flex col auth">
-            <h1>
-              <i className="fa fa-book"></i>&nbsp;Signup
-            </h1>
-            <input
-              type="text"
-              name="user"
-              placeholder="Player name"
-              value={this.state.user}
-              onChange={this.changeHandler}
-            />
-            <input
-              type="password"
-              name="pass"
-              placeholder="Password"
-              value={this.state.pass}
-              onChange={this.changeHandler}
-            />
-            {this.state.error ? (
-              <p className="error">
-                <i className="fa fa-times-circle"></i>&nbsp;
-                {this.state.error}
-              </p>
-            ) : null}
-            <button type="submit">SIGNUP</button>
-            <h4>
-              Registered?<NavLink to="/signin">Signin</NavLink>
-            </h4>
-          </form>
-        </div>
-        <Footer />
-      </Fragment>
-    );
-  }
+  return (
+    <Fragment>
+      <div className="flex col signup-page">
+        <form onSubmit={signUpUser} className="flex col auth">
+          <h1>
+            <i className="fa fa-book"></i>&nbsp;Signup
+          </h1>
+          <input
+            type="text"
+            name="user"
+            placeholder="Player name"
+            value={user}
+            onChange={changeHandler}
+          />
+          <input
+            type="password"
+            name="pass"
+            placeholder="Password"
+            value={pass}
+            onChange={changeHandler}
+          />
+          {error ? (
+            <p className="error">
+              <i className="fa fa-times-circle"></i>&nbsp;
+              {error}
+            </p>
+          ) : null}
+          <button type="submit">SIGNUP</button>
+          <h4>
+            Registered?<NavLink to="/signin">Signin</NavLink>
+          </h4>
+        </form>
+      </div>
+      <Footer />
+    </Fragment>
+  );
 }
-
-export default withRouter(Signup);
