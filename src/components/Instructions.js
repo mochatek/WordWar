@@ -19,7 +19,7 @@ export default function Instructions({ closeHandler }) {
             <mark>Cross Reference</mark>
           </li>
           <li>
-            A word can only be used <mark>once</mark> in a game
+            A word can only be used <mark>once</mark> in the game
           </li>
           <li>
             A player will be chosen at random to start the game and he/she must
@@ -27,7 +27,8 @@ export default function Instructions({ closeHandler }) {
             runs out
           </li>
           <li>
-            A simple click on the word will yield it's <mark>meaning</mark>
+            Clicking the word will yield the <mark>meaning</mark> and plays the{" "}
+            <mark>pronounciation</mark>
           </li>
           <li>
             After a valid entry, the turn will go to the second player and

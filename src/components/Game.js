@@ -23,14 +23,27 @@ export default function Game({ socket, user, room, turn }) {
 
   const interval_id = useRef(0);
   const time_ref = useRef(time);
-  const word_history = useRef([]);
+  const word_history = useRef({
+    game_all: new Set(),
+    user_all: new Set(),
+  });
 
   useEffect(() => {
+    word_history.current.user_all = new Set(
+      JSON.parse(localStorage.getItem(`${user}-words`)) || []
+    );
+
     socket.on("word", showWord);
     socket.on("end", endGame);
     startTimer();
     return () => {
       clearInterval(interval_id.current);
+
+      localStorage.setItem(
+        `${user}-words`,
+        JSON.stringify([...word_history.current.user_all])
+      );
+
       socket.off("word", showWord);
       socket.off("end", endGame);
     };
@@ -58,8 +71,15 @@ export default function Game({ socket, user, room, turn }) {
 
   function endGame(player) {
     clearInterval(interval_id.current);
+
+    localStorage.setItem(
+      `${user}-words`,
+      JSON.stringify([...word_history.current.user_all])
+    );
+
     socket.off("word", showWord);
     socket.off("end", endGame);
+
     setWinner(player);
   }
 
@@ -76,8 +96,10 @@ export default function Game({ socket, user, room, turn }) {
 
   async function submitWord() {
     if (word && !fetching_word) {
-      if (word_history.current.includes(word)) {
-        setError("Word already used");
+      if (word_history.current.game_all.has(word)) {
+        setError("Word already used in this Game");
+      } else if (word_history.current.user_all.has(word)) {
+        setError("You had used this word before");
       } else {
         setFetchingWord(true);
         const {
@@ -106,10 +128,11 @@ export default function Game({ socket, user, room, turn }) {
 
   function showWord({ from, word: new_word, meaning, speech, turn }) {
     WORD_AUDIO.play();
-    word_history.current.push(new_word);
+    word_history.current.game_all.add(new_word);
 
     if (from === user) {
       setUserWords((prev) => [...prev, { word: new_word, meaning, speech }]);
+      word_history.current.user_all.add(new_word);
       setMyTurn(turn === user);
       setTime(DURATION);
     } else {

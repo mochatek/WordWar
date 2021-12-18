@@ -11,9 +11,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 # Instructions
 
 - Any words found in a standard dictionary are permitted - except those that are **Noun/Abbreviation/Cross Reference**
-- A word can only be used **once** in a game
+- A word can only be used **once** in the game
 - A player will be chosen at random to start the game and he/she must enter a permitted word before the **timer** runs out
-- A simple click on the word will yield it's **meaning**
+- Clicking the word will yield the **meaning** and plays the **pronounciation**
 - After a valid entry, the turn will go to the second player and he/she is required to enter a **word starting with the letter that the previous one ended with**
 - A green overlay over the input field denotes our **turn**
 - The game will continue until either player quits or the timer runs out in which case the other player **WINS!**

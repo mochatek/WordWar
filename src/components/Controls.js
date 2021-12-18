@@ -6,7 +6,10 @@ export default function Controls({ word, turn, submitHandler, wordHandler }) {
 
   function setWord(event) {
     event.preventDefault();
-    const new_word = event.target.value.trim().toLocaleLowerCase();
+    const new_word = event.target.value
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/[^a-z]/gi, "");
     wordHandler(new_word);
   }
 
