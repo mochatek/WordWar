@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/WordWar/static/css/main.921ed0ac.css",
-    "main.js": "/WordWar/static/js/main.47e5bb4d.js",
+    "main.js": "/WordWar/static/js/main.275917af.js",
     "index.html": "/WordWar/index.html",
     "main.921ed0ac.css.map": "/WordWar/static/css/main.921ed0ac.css.map",
-    "main.47e5bb4d.js.map": "/WordWar/static/js/main.47e5bb4d.js.map"
+    "main.275917af.js.map": "/WordWar/static/js/main.275917af.js.map"
   },
   "entrypoints": [
     "static/css/main.921ed0ac.css",
-    "static/js/main.47e5bb4d.js"
+    "static/js/main.275917af.js"
   ]
 }
