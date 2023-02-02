@@ -1,6 +1,6 @@
 class AuthService {
   constructor() {
-    this.ENDPOINT = "https://word-war.herokuapp.com/api/auth";
+    this.ENDPOINT = "https://word-war.onrender.com/api/auth";
     // this.ENDPOINT = "http://localhost:5000/api/auth";
   }
 
